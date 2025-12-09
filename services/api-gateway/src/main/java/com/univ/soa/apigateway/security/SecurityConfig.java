@@ -20,14 +20,24 @@ public class SecurityConfig {
     // Existing SecurityWebFilterChain remains unchanged
     @Bean
     public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
+        // Laisser la logique d'autorisation au filtre global JwtAuthenticationFilter
+        // Nous configurons Spring Security pour qu'il autorise tout ce qui est public via le filtre
+        // et bloque implicitement le reste (sauf si le filtre le valide)
+
         return http
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .authorizeExchange(exchange -> exchange
-                        // Autoriser TOUTES les requêtes - la sécurité est gérée par JwtAuthenticationFilter
-                        .anyExchange().permitAll()
+                        // Autoriser les chemins publics DIRECTEMENT ici pour éviter les conflits
+                        .pathMatchers("/auth/signin", "/auth/register").permitAll()
+
+                        // Tous les autres chemins DOIVENT être authentifiés.
+                        // Le filtre JwtAuthenticationFilter s'exécutera avant cette vérification
+                        // pour définir le principal authentifié.
+                        .anyExchange().authenticated()
                 )
                 .build();
     }
+<<<<<<< HEAD
 
     // ===============================================
     // 💡 CORS Configuration Bean Added Here
@@ -57,3 +67,6 @@ public class SecurityConfig {
     }
     // ===============================================
 }
+=======
+}
+>>>>>>> 91f272a8df9bab183afdf39393d2585a684c0e79
