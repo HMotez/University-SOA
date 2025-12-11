@@ -1,13 +1,12 @@
 package com.univ.soa.billing_service.service;
 
-import com.univ.soa.billing_service.dto.CreateInvoiceRequest;
-import com.univ.soa.billing_service.dto.InvoiceResponse;
 import com.univ.soa.billing_service.entity.Invoice;
 import com.univ.soa.billing_service.entity.InvoiceItem;
 import com.univ.soa.billing_service.repository.InvoiceRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
-
+import com.univ.soa.billing_service.dto.CreateInvoiceRequest; // <-- ADD THIS LINE
+import com.univ.soa.billing_service.dto.InvoiceResponse;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;

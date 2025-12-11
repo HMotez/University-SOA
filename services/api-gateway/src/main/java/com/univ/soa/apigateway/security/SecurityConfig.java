@@ -2,7 +2,6 @@ package com.univ.soa.apigateway.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.web.server.SecurityWebFilterChain;
@@ -11,6 +10,7 @@ import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.reactive.CorsWebFilter;
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
+
 import java.util.Arrays;
 
 @Configuration
@@ -18,29 +18,27 @@ import java.util.Arrays;
 public class SecurityConfig {
 
     @Bean
-    public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
+    public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
 
         return http
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
-                .authorizeExchange(exchanges -> exchanges
+                .authorizeExchange(exchange -> exchange
 
-                        // ===== PUBLIC ENDPOINTS =====
-                        .pathMatchers("/auth/**").permitAll()
-                        .pathMatchers(HttpMethod.POST, "/auth/register").permitAll()
-                        .pathMatchers(HttpMethod.POST, "/auth/login").permitAll()
+                        // ✅ Allow SIGNIN + REGISTER without JWT
+                        .pathMatchers("/auth/signin", "/auth/register").permitAll()
 
-                        // ===== PUBLIC TEST ENDPOINTS =====
-                        .pathMatchers("/actuator/**").permitAll()
+                        // ✅ Allow direct SOAP calls without JWT
+                        .pathMatchers("/billing/ws/**").permitAll()
 
-                        // ===== EVERYTHING ELSE REQUIRES AUTH =====
+                        // 🔐 Everything else requires JWT
                         .anyExchange().authenticated()
                 )
                 .build();
     }
 
-    // ===============================================
-    // CORS CONFIG (Allows frontend http://localhost:5173)
-    // ===============================================
+    // ================================
+    // ⚙️ CORS CONFIG
+    // ================================
     @Bean
     public CorsWebFilter corsWebFilter() {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
@@ -53,7 +51,6 @@ public class SecurityConfig {
         corsConfig.setMaxAge(3600L);
 
         source.registerCorsConfiguration("/**", corsConfig);
-
         return new CorsWebFilter(source);
     }
 }

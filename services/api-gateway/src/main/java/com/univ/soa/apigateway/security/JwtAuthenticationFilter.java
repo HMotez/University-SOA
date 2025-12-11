@@ -9,53 +9,80 @@ import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
+
 @Component
 public class JwtAuthenticationFilter implements GlobalFilter {
 
     @Autowired
     private JwtUtil jwtUtil;
 
+    // Public endpoints that do NOT require JWT
+    private static final List<String> PUBLIC_ENDPOINTS = List.of(
+            "/auth/signin",
+            "/auth/register"
+    );
+
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
 
         String path = exchange.getRequest().getURI().getPath();
 
-        // ===== ALLOW ALL /auth/** ROUTES WITHOUT TOKEN =====
-        // (register, login, signin, etc.)
-        if (path.startsWith("/auth/")) {
-            System.out.println("PUBLIC ROUTE: " + path);
+        // ============================================================
+        // ✅ 1. BYPASS SOAP BILLING (ALL /billing/ws/**)
+        // ============================================================
+        if (path.startsWith("/billing/ws")) {
+            System.out.println("GATEWAY: SOAP Billing request allowed → " + path);
             return chain.filter(exchange);
         }
 
-        // ===== PROTECTED ROUTES BELOW =====
-
-        // 1. Must contain Authorization header
-        if (!exchange.getRequest().getHeaders().containsKey(HttpHeaders.AUTHORIZATION)) {
-            return unauthorized(exchange, "Missing Authorization header for route: " + path);
+        // ============================================================
+        // ✅ 2. BYPASS PUBLIC AUTH ENDPOINTS
+        // ============================================================
+        for (String publicPath : PUBLIC_ENDPOINTS) {
+            if (path.startsWith(publicPath)) {
+                System.out.println("GATEWAY: Public endpoint → allowed: " + path);
+                return chain.filter(exchange);
+            }
         }
 
+        // ============================================================
+        // 🔒 3. VERIFY AUTHORIZATION HEADER EXISTS
+        // ============================================================
         String authHeader = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
 
-        // 2. Must be in the form "Bearer <token>"
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return unauthorized(exchange, "Invalid Authorization header format.");
+        if (authHeader == null) {
+            return unauthorized(exchange, "Missing Authorization header");
         }
 
-        // 3. Extract token
+        if (!authHeader.startsWith("Bearer ")) {
+            return unauthorized(exchange, "Authorization header must be in format: Bearer <token>");
+        }
+
+        // ============================================================
+        // 🔒 4. EXTRACT TOKEN
+        // ============================================================
         String token = authHeader.substring(7);
 
-        // 4. Validate token
+        // ============================================================
+        // 🔒 5. VALIDATE TOKEN
+        // ============================================================
         if (!jwtUtil.isTokenValid(token)) {
-            return unauthorized(exchange, "Invalid or expired token");
+            return unauthorized(exchange, "Invalid or expired JWT token");
         }
 
-        // 5. Token valid -> Continue
-        System.out.println("GATEWAY: Valid token for route: " + path);
+        // ============================================================
+        // ✅ 6. TOKEN VALID → CONTINUE REQUEST
+        // ============================================================
+        System.out.println("GATEWAY: Valid JWT → " + path);
         return chain.filter(exchange);
     }
 
+    // ============================================================
+    // ❌ RETURN 401 RESPONSE HELPERS
+    // ============================================================
     private Mono<Void> unauthorized(ServerWebExchange exchange, String message) {
-        System.err.println("UNAUTHORIZED: " + message);
+        System.err.println("UNAUTHORIZED ACCESS: " + message);
         exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
         return exchange.getResponse().setComplete();
     }

@@ -1,7 +1,6 @@
 package com.univ.soa.billing_service.dto;
 
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.util.List;
