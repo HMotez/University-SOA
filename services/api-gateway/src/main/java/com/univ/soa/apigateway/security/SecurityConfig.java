@@ -6,7 +6,7 @@ import org.springframework.security.config.annotation.web.reactive.EnableWebFlux
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 
-// CORS imports
+// CORS
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.reactive.CorsWebFilter;
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
@@ -24,33 +24,32 @@ public class SecurityConfig {
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .authorizeExchange(exchange -> exchange
 
-                        // ✅ Allow SIGNIN + REGISTER without JWT
-                        .pathMatchers("/auth/signin", "/auth/register").permitAll()
+                        // AUTH (before & after StripPrefix)
+                        .pathMatchers("/auth/register", "/auth/signin").permitAll()
+                        .pathMatchers("/register", "/signin").permitAll()
 
-                        // ✅ Allow direct SOAP calls without JWT
-                        .pathMatchers("/billing/ws/**").permitAll()
+                        // BILLING SOAP (before & after rewrite)
+                        .pathMatchers("/billing/ws/**", "/billing/wsdl").permitAll()
+                        .pathMatchers("/ws/**", "/wsdl").permitAll()
 
-                        // 🔐 Everything else requires JWT
+                        // Everything else requires JWT
                         .anyExchange().authenticated()
                 )
                 .build();
     }
 
-    // ================================
-    // ⚙️ CORS CONFIG
-    // ================================
     @Bean
     public CorsWebFilter corsWebFilter() {
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowedOrigins(Arrays.asList("http://localhost:5173"));
+        config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        config.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
+        config.setAllowCredentials(true);
+        config.setMaxAge(3600L);
+
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        CorsConfiguration corsConfig = new CorsConfiguration();
+        source.registerCorsConfiguration("/**", config);
 
-        corsConfig.setAllowedOrigins(Arrays.asList("http://localhost:5173"));
-        corsConfig.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        corsConfig.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
-        corsConfig.setAllowCredentials(true);
-        corsConfig.setMaxAge(3600L);
-
-        source.registerCorsConfiguration("/**", corsConfig);
         return new CorsWebFilter(source);
     }
 }
