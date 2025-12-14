@@ -1,85 +1,102 @@
-# Cahier des charges – Système Universitaire SOA
+# Specifications Document – SOA University System
 
-## 1. Contexte
+## 1. Context
 
-L’université souhaite moderniser son système d’information en adoptant une architecture orientée services (SOA).
-L’objectif est de séparer les fonctionnalités en plusieurs services indépendants (REST et SOAP) afin de faciliter :
-- l’évolutivité,
-- la maintenabilité,
-- l’interopérabilité entre différentes technologies. 
+The university aims to modernize its information system by adopting a **Service-Oriented Architecture (SOA)**.  
+The objective is to separate functionalities into several independent services (REST and SOAP) in order to facilitate:
 
-Ce mini-projet est réalisé dans le cadre du module **Architecture SOA et Services Web**, encadré par Mme **Ghada Feki**.
+- scalability,  
+- maintainability,  
+- interoperability between different technologies.
 
-## 2. Objectifs du projet
+This mini-project is carried out as part of the **SOA Architecture and Web Services** module, supervised by **Ms. Ghada Feki**.
 
-- Mettre en place une **architecture SOA complète** pour un système de gestion universitaire.
-- Développer plusieurs **services web** hétérogènes (REST + SOAP).
-- Assurer la **sécurité** via un service d’authentification (JWT).
-- Permettre l’**interopérabilité** entre différentes technologies (Spring Boot, Node.js, etc.).
-- Préparer le projet au **déploiement conteneurisé** (Docker / Docker Compose).
-- Fournir une **documentation technique** et un **manuel d’utilisation**.
-- Présenter une **soutenance** avec démonstration fonctionnelle.
+---
 
-## 3. Périmètre fonctionnel
+## 2. Project Objectives
 
-Le système couvre les domaines suivants :
+- Implement a **complete SOA architecture** for a university management system.
+- Develop multiple **heterogeneous web services** (REST and SOAP).
+- Ensure **security** through an authentication service (JWT).
+- Enable **interoperability** between different technologies (Spring Boot, Node.js, etc.).
+- Prepare the project for **containerized deployment** (Docker / Docker Compose).
+- Provide **technical documentation** and a **user manual**.
+- Deliver a **project defense** with a functional demonstration.
 
-### 3.1 Gestion des utilisateurs & authentification
+---
 
-- Création de comptes (admin, enseignant, étudiant).
-- Authentification (login/mot de passe).
-- Génération d’un jeton **JWT**.
-- Gestion des rôles et des droits d’accès.
+## 3. Functional Scope
 
-### 3.2 Gestion des étudiants
+The system covers the following areas:
 
-- Créer, modifier, supprimer un étudiant.
-- Consulter les informations d’un étudiant.
-- Lister les étudiants par filière, niveau, groupe.
+### 3.1 User Management & Authentication
 
-### 3.3 Gestion des cours et emplois du temps
+- Account creation (admin, teacher, student).
+- Authentication (username/password).
+- **JWT** token generation.
+- Role and access rights management.
 
-- Créer un cours (code, nom, enseignant, niveau).
-- Modifier / supprimer un cours.
-- Associer un cours à un groupe et un horaire.
-- Consulter l’emploi du temps.
+---
 
-### 3.4 Gestion des notes
+### 3.2 Student Management
 
-- Saisir les notes d’un étudiant pour un cours.
-- Calculer la moyenne.
-- Déterminer l’état : **ACQUIS** / **RATTRAPAGE**.
+- Create, update, and delete a student.
+- View student information.
+- List students by department, level, and group.
 
-### 3.5 Gestion de la facturation
+---
 
-- Calcul des frais universitaires (inscription, scolarité, pénalités…).
-- Gestion des paiements.
-- Génération de justificatifs / reçus.
+### 3.3 Course and Timetable Management
+
+- Create a course (code, name, teacher, level).
+- Update / delete a course.
+- Assign a course to a group and a schedule.
+- View timetables.
+
+---
+
+### 3.4 Grade Management
+
+- Enter student grades for a course.
+- Calculate the average.
+- Determine the status: **PASSED** / **RETAKE**.
+
+---
+
+### 3.5 Billing Management
+
+- Calculation of university fees (registration, tuition, penalties, etc.).
+- Payment management.
+- Generation of invoices / receipts.
+
+---
 
 ### 3.6 API Gateway
 
-- Fournir un point d’entrée unique pour les clients (front-end, Postman).
-- Router les requêtes vers les services internes.
-- Option d’agrégation de données (ex : fiche étudiant = infos + notes + facturation).
+- Provide a single entry point for clients (front-end, Postman).
+- Route requests to internal services.
+- Optional data aggregation  
+  (e.g., student profile = information + grades + billing).
 
-## 4. Périmètre non fonctionnel
+---
 
-- **Performance** : temps de réponse acceptable en environnement local.
-- **Sécurité** :
-  - Authentification par JWT.
-  - Protection des endpoints sensibles.
-- **Interopérabilité** :
-  - Services développés avec différentes technologies backend.
-- **Scalabilité** :
-  - Services découplés pouvant être déployés séparément.
-- **Déploiement** :
-  - Utilisation de Docker et docker-compose.
+## 4. Non-Functional Scope
 
-## 5. Acteurs
+- **Performance**: acceptable response time in a local environment.
+- **Security**:
+  - JWT-based authentication.
+  - Protection of sensitive endpoints.
+- **Interoperability**:
+  - Services developed using different backend technologies.
+- **Scalability**:
+  - Decoupled services that can be deployed independently.
+- **Deployment**:
+  - Use of Docker and Docker Compose.
 
-- **Administrateur** : gère les utilisateurs, les cours, la facturation.
-- **Enseignant** : saisit les notes.
-- **Étudiant** : consulte ses informations (notes, cours, factures).
+---
 
+## 5. Actors
 
-
+- **Administrator**: manages users, courses, and billing.
+- **Teacher**: enters grades.
+- **Student**: views personal information (grades, courses, invoices).
